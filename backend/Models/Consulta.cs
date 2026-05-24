@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace backend.Models;
 
-public class Consultas
+public class Consulta
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
@@ -20,4 +20,6 @@ public class Consultas
     public string Observacoes { get; set;} = string.Empty;
 
     public string Status { get; set;} = "Agendada";
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

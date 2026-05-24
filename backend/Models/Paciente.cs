@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace backend.Models;
 
-public class Pacientes
+public class Paciente
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
@@ -21,5 +21,5 @@ public class Pacientes
 
     public string Sexo { get; set;} = string.Empty;
 
-    public DateTime CreateAt { get; set;} = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set;} = DateTime.UtcNow;
 }
