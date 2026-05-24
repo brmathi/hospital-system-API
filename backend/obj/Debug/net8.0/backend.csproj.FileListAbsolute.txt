@@ -39,3 +39,4 @@
 /home/bruna/Documentos/hospital-system/backend/bin/Debug/net8.0/SharpCompress.dll
 /home/bruna/Documentos/hospital-system/backend/bin/Debug/net8.0/Snappier.dll
 /home/bruna/Documentos/hospital-system/backend/bin/Debug/net8.0/ZstdSharp.dll
+/home/bruna/Documentos/hospital-system/backend/obj/Debug/net8.0/backend.sourcelink.json
