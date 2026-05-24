@@ -4,13 +4,15 @@ namespace backend.Interfaces;
 
 public interface IConsultasRepository
 {
-    Task<List<Consultas>> GetAllAsync();
+    Task<List<Consulta>> GetAllAsync();
 
-    Task<Consultas?> GetByIdAsync(string id);
+    Task<Consulta?> GetByIdAsync(string id);
 
-    Task CreateAsync(Consultas consultas);
+    Task<List<Consulta>> GetByPacienteIdAsync(string pacienteId);
 
-    Task UpdateAsync(string id, Consultas consultas);
+    Task CreateAsync(Consulta consulta);
+
+    Task UpdateAsync(string id, Consulta consulta);
 
     Task DeleteAsync(string id);
 }

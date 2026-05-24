@@ -4,13 +4,15 @@ namespace backend.Interfaces;
 
 public interface IPacientesRepository
 {
-    Task<List<Pacientes>> GetAllAsync();
+    Task<List<Paciente>> GetAllAsync();
 
-    Task <Pacientes?> GetByIdAsync(string id);
+    Task <Paciente?> GetByIdAsync(string id);
 
-    Task CreateAsync(Pacientes pacientes);
+    Task <Paciente?> GetByCpfAsync(string cpf);
 
-    Task UpdateAsync(string id, Pacientes pacientes);
+    Task CreateAsync(Paciente paciente);
+
+    Task UpdateAsync(string id, Paciente paciente);
 
     Task DeleteAsync(string id);
 }
