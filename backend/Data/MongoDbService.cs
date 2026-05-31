@@ -16,9 +16,9 @@ public class MongoDbService
         _database = client.GetDatabase(settings.Value.DatabaseName);
     }
 
-    public IMongoCollection<Pacientes> Pacientes
-    => _database.GetCollection<Pacientes>("Pacientes");
+    public IMongoCollection<Paciente> Pacientes
+    => _database.GetCollection<Paciente>("Pacientes");
 
-    public IMongoCollection<Consultas> Consultas
-    => _database.GetCollection<Consultas>("Consultas");
+    public IMongoCollection<Consulta> Consultas
+    => _database.GetCollection<Consulta>("Consultas");
 }
