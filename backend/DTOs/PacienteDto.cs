@@ -23,7 +23,7 @@ public class PacienteRequestDto
     public string Sexo {get; set;} = string.Empty;
 }
 
-public class PacienteRespondeDto
+public class PacienteResponseDto
 {
     public string Id {get; set;} = string.Empty;
     public string Nome {get; set;} = string.Empty;
