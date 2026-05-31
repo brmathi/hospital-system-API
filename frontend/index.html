@@ -1,1 +1,833 @@
+/* criando frontend com IA, para implementação mais facil do backend */
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hospital System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0b0f1a;
+      --surface: #111827;
+      --surface2: #1a2235;
+      --border: #1e2d45;
+      --accent: #3b82f6;
+      --accent2: #06b6d4;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --font: 'Sora', sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      min-height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 0;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+    }
+
+    .logo {
+      padding: 0 24px 28px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo-icon { font-size: 28px; margin-bottom: 6px; }
+    .logo h1 { font-size: 15px; font-weight: 700; letter-spacing: 0.5px; }
+    .logo span { font-size: 11px; color: var(--muted); font-weight: 400; }
+
+    nav { padding: 20px 12px; flex: 1; }
+    nav .section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 12px;
+      margin-bottom: 8px;
+      margin-top: 16px;
+    }
+    nav .section-label:first-child { margin-top: 0; }
+
+    nav button {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 10px 12px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: 13.5px;
+      font-weight: 500;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: left;
+    }
+    nav button:hover { background: var(--surface2); color: var(--text); }
+    nav button.active { background: rgba(59,130,246,0.15); color: var(--accent); }
+    nav button .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+    /* Main */
+    .main {
+      margin-left: 240px;
+      flex: 1;
+      padding: 32px;
+      min-height: 100vh;
+    }
+
+    .page { display: none; animation: fadeIn 0.2s ease; }
+    .page.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Page header */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    .page-header h2 { font-size: 22px; font-weight: 700; }
+    .page-header p { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: #2563eb; }
+    .btn-danger { background: rgba(239,68,68,0.15); color: var(--danger); }
+    .btn-danger:hover { background: rgba(239,68,68,0.25); }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .btn-ghost { background: var(--surface2); color: var(--text); }
+    .btn-ghost:hover { background: var(--border); }
+
+    /* Cards / Table */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      padding: 12px 16px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: var(--surface2);
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--surface2); }
+    tbody td { padding: 13px 16px; font-size: 13.5px; }
+    .td-actions { display: flex; gap: 8px; }
+
+    /* Badge */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-blue { background: rgba(59,130,246,0.15); color: #60a5fa; }
+    .badge-green { background: rgba(16,185,129,0.15); color: #34d399; }
+    .badge-yellow { background: rgba(245,158,11,0.15); color: #fbbf24; }
+    .badge-red { background: rgba(239,68,68,0.15); color: #f87171; }
+
+    /* Form */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      padding: 24px;
+    }
+    .form-grid .full { grid-column: 1 / -1; }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+    }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 13.5px;
+      outline: none;
+      transition: border 0.15s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--accent);
+    }
+    .field textarea { resize: vertical; min-height: 80px; }
+    .field select option { background: var(--surface2); }
+
+    .form-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    /* Detail view */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+    }
+    .detail-item {
+      background: var(--surface);
+      padding: 16px 20px;
+    }
+    .detail-item .label { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 4px; }
+    .detail-item .value { font-size: 14px; font-weight: 500; }
+
+    /* Alerts */
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .alert.show { display: block; }
+    .alert-success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #34d399; }
+    .alert-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #f87171; }
+
+    /* Loading */
+    .loading { text-align: center; padding: 48px; color: var(--muted); font-size: 13px; }
+    .spinner {
+      width: 28px; height: 28px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty { text-align: center; padding: 48px; color: var(--muted); }
+    .empty-icon { font-size: 36px; margin-bottom: 12px; }
+
+    /* Stats cards */
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .stat-card .stat-label { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 8px; }
+    .stat-card .stat-value { font-size: 32px; font-weight: 700; font-family: var(--mono); }
+    .stat-card .stat-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    /* Back button */
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      background: none;
+      border: none;
+      font-family: var(--font);
+      transition: color 0.15s;
+    }
+    .back-btn:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">🏥</div>
+    <h1>Hospital System</h1>
+    <span>Gestão Hospitalar</span>
+  </div>
+  <nav>
+    <div class="section-label">Principal</div>
+    <button class="active" onclick="showPage('dashboard')" id="nav-dashboard">
+      <span class="nav-icon">📊</span> Dashboard
+    </button>
+
+    <div class="section-label">Cadastros</div>
+    <button onclick="showPage('pacientes')" id="nav-pacientes">
+      <span class="nav-icon">👤</span> Pacientes
+    </button>
+    <button onclick="showPage('consultas')" id="nav-consultas">
+      <span class="nav-icon">🗓️</span> Consultas
+    </button>
+
+    <div class="section-label">Ações</div>
+    <button onclick="showPage('novo-paciente')" id="nav-novo-paciente">
+      <span class="nav-icon">➕</span> Novo Paciente
+    </button>
+    <button onclick="showPage('nova-consulta')" id="nav-nova-consulta">
+      <span class="nav-icon">📋</span> Nova Consulta
+    </button>
+  </nav>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-header">
+      <div>
+        <h2>Dashboard</h2>
+        <p>Visão geral do sistema hospitalar</p>
+      </div>
+    </div>
+    <div class="stats" id="stats-container">
+      <div class="stat-card">
+        <div class="stat-label">Total de Pacientes</div>
+        <div class="stat-value" id="stat-pacientes">—</div>
+        <div class="stat-sub">cadastrados no sistema</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total de Consultas</div>
+        <div class="stat-value" id="stat-consultas">—</div>
+        <div class="stat-sub">registradas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Consultas Agendadas</div>
+        <div class="stat-value" id="stat-agendadas">—</div>
+        <div class="stat-sub">aguardando atendimento</div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="padding:16px 20px; border-bottom:1px solid var(--border); font-weight:600; font-size:14px;">
+        Consultas Recentes
+      </div>
+      <div id="dashboard-consultas"><div class="loading"><div class="spinner"></div>Carregando...</div></div>
+    </div>
+  </div>
+
+  <!-- PACIENTES -->
+  <div class="page" id="page-pacientes">
+    <div class="page-header">
+      <div>
+        <h2>Pacientes</h2>
+        <p>Lista de todos os pacientes cadastrados</p>
+      </div>
+      <button class="btn btn-primary" onclick="showPage('novo-paciente')">➕ Novo Paciente</button>
+    </div>
+    <div class="card">
+      <div id="pacientes-container"><div class="loading"><div class="spinner"></div>Carregando...</div></div>
+    </div>
+  </div>
+
+  <!-- DETALHE PACIENTE -->
+  <div class="page" id="page-detalhe-paciente">
+    <button class="back-btn" onclick="showPage('pacientes')">← Voltar para Pacientes</button>
+    <div class="page-header">
+      <div><h2 id="detalhe-paciente-nome">Paciente</h2><p>Dados completos do paciente</p></div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-ghost" id="btn-editar-paciente">✏️ Editar</button>
+        <button class="btn btn-danger" id="btn-deletar-paciente">🗑️ Excluir</button>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:24px;">
+      <div id="detalhe-paciente-content"><div class="loading"><div class="spinner"></div>Carregando...</div></div>
+    </div>
+    <div class="page-header">
+      <div><h2 style="font-size:16px;">Consultas do Paciente</h2></div>
+    </div>
+    <div class="card">
+      <div id="consultas-do-paciente"><div class="loading"><div class="spinner"></div>Carregando...</div></div>
+    </div>
+  </div>
+
+  <!-- NOVO / EDITAR PACIENTE -->
+  <div class="page" id="page-novo-paciente">
+    <button class="back-btn" onclick="showPage('pacientes')">← Voltar</button>
+    <div class="page-header">
+      <div><h2 id="form-paciente-titulo">Novo Paciente</h2><p>Preencha os dados do paciente</p></div>
+    </div>
+    <div id="alert-paciente" class="alert"></div>
+    <div class="card">
+      <div class="form-grid">
+        <div class="field full">
+          <label>Nome Completo *</label>
+          <input type="text" id="p-nome" placeholder="Ex: João Silva"/>
+        </div>
+        <div class="field">
+          <label>CPF *</label>
+          <input type="text" id="p-cpf" placeholder="000.000.000-00"/>
+        </div>
+        <div class="field">
+          <label>E-mail</label>
+          <input type="email" id="p-email" placeholder="email@exemplo.com"/>
+        </div>
+        <div class="field">
+          <label>Telefone</label>
+          <input type="text" id="p-telefone" placeholder="(31) 99999-0000"/>
+        </div>
+        <div class="field">
+          <label>Data de Nascimento *</label>
+          <input type="date" id="p-nascimento"/>
+        </div>
+        <div class="field">
+          <label>Sexo *</label>
+          <select id="p-sexo">
+            <option value="">Selecione...</option>
+            <option value="Masculino">Masculino</option>
+            <option value="Feminino">Feminino</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-footer">
+        <button class="btn btn-ghost" onclick="showPage('pacientes')">Cancelar</button>
+        <button class="btn btn-primary" onclick="salvarPaciente()">💾 Salvar Paciente</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONSULTAS -->
+  <div class="page" id="page-consultas">
+    <div class="page-header">
+      <div>
+        <h2>Consultas</h2>
+        <p>Lista de todas as consultas agendadas</p>
+      </div>
+      <button class="btn btn-primary" onclick="showPage('nova-consulta')">➕ Nova Consulta</button>
+    </div>
+    <div class="card">
+      <div id="consultas-container"><div class="loading"><div class="spinner"></div>Carregando...</div></div>
+    </div>
+  </div>
+
+  <!-- NOVA / EDITAR CONSULTA -->
+  <div class="page" id="page-nova-consulta">
+    <button class="back-btn" onclick="showPage('consultas')">← Voltar</button>
+    <div class="page-header">
+      <div><h2 id="form-consulta-titulo">Nova Consulta</h2><p>Preencha os dados da consulta</p></div>
+    </div>
+    <div id="alert-consulta" class="alert"></div>
+    <div class="card">
+      <div class="form-grid">
+        <div class="field full">
+          <label>Paciente *</label>
+          <select id="c-paciente">
+            <option value="">Selecione o paciente...</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Data e Hora *</label>
+          <input type="datetime-local" id="c-data"/>
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <select id="c-status">
+            <option value="Agendada">Agendada</option>
+            <option value="Realizada">Realizada</option>
+            <option value="Cancelada">Cancelada</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Médico *</label>
+          <input type="text" id="c-medico" placeholder="Nome do médico"/>
+        </div>
+        <div class="field">
+          <label>Especialidade *</label>
+          <input type="text" id="c-especialidade" placeholder="Ex: Cardiologia"/>
+        </div>
+        <div class="field full">
+          <label>Observações</label>
+          <textarea id="c-observacoes" placeholder="Anotações adicionais..."></textarea>
+        </div>
+      </div>
+      <div class="form-footer">
+        <button class="btn btn-ghost" onclick="showPage('consultas')">Cancelar</button>
+        <button class="btn btn-primary" onclick="salvarConsulta()">💾 Salvar Consulta</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const API = 'http://localhost:5000/api';
+  let editandoPacienteId = null;
+  let editandoConsultaId = null;
+
+  // ───── NAVEGAÇÃO ASSÍNCRONA ─────
+  function showPage(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+
+    const pageEl = document.getElementById('page-' + page);
+    if (pageEl) pageEl.classList.add('active');
+
+    const navEl = document.getElementById('nav-' + page);
+    if (navEl) navEl.classList.add('active');
+
+    // Carrega dados conforme a página
+    if (page === 'dashboard') loadDashboard();
+    if (page === 'pacientes') loadPacientes();
+    if (page === 'consultas') loadConsultas();
+    if (page === 'novo-paciente') {
+      editandoPacienteId = null;
+      limparFormPaciente();
+      document.getElementById('form-paciente-titulo').textContent = 'Novo Paciente';
+    }
+    if (page === 'nova-consulta') {
+      editandoConsultaId = null;
+      limparFormConsulta();
+      document.getElementById('form-consulta-titulo').textContent = 'Nova Consulta';
+      carregarPacientesNoSelect();
+    }
+  }
+
+  // ───── DASHBOARD ─────
+  async function loadDashboard() {
+    try {
+      const [pacientes, consultas] = await Promise.all([
+        fetch(`${API}/pacientes`).then(r => r.json()),
+        fetch(`${API}/consultas`).then(r => r.json())
+      ]);
+
+      document.getElementById('stat-pacientes').textContent = pacientes.length;
+      document.getElementById('stat-consultas').textContent = consultas.length;
+      const agendadas = consultas.filter(c => c.status === 'Agendada').length;
+      document.getElementById('stat-agendadas').textContent = agendadas;
+
+      const recentes = consultas.slice(-5).reverse();
+      document.getElementById('dashboard-consultas').innerHTML = recentes.length
+        ? `<table>
+            <thead><tr><th>Paciente</th><th>Médico</th><th>Especialidade</th><th>Data</th><th>Status</th></tr></thead>
+            <tbody>${recentes.map(c => `
+              <tr>
+                <td>${c.pacienteNome}</td>
+                <td>${c.medico}</td>
+                <td>${c.especialidade}</td>
+                <td>${formatDate(c.dataConsulta)}</td>
+                <td>${badgeStatus(c.status)}</td>
+              </tr>`).join('')}
+            </tbody>
+          </table>`
+        : `<div class="empty"><div class="empty-icon">🗓️</div><p>Nenhuma consulta registrada ainda.</p></div>`;
+    } catch (e) {
+      document.getElementById('dashboard-consultas').innerHTML = `<div class="empty"><p style="color:var(--danger)">Erro ao conectar com a API.</p></div>`;
+    }
+  }
+
+  // ───── PACIENTES ─────
+  async function loadPacientes() {
+    document.getElementById('pacientes-container').innerHTML = '<div class="loading"><div class="spinner"></div>Carregando...</div>';
+    try {
+      const res = await fetch(`${API}/pacientes`);
+      const data = await res.json();
+
+      if (!data.length) {
+        document.getElementById('pacientes-container').innerHTML = `<div class="empty"><div class="empty-icon">👤</div><p>Nenhum paciente cadastrado.</p></div>`;
+        return;
+      }
+
+      document.getElementById('pacientes-container').innerHTML = `
+        <table>
+          <thead><tr><th>Nome</th><th>CPF</th><th>E-mail</th><th>Telefone</th><th>Sexo</th><th>Ações</th></tr></thead>
+          <tbody>${data.map(p => `
+            <tr>
+              <td><strong>${p.nome}</strong></td>
+              <td style="font-family:var(--mono);font-size:12px">${p.cpf}</td>
+              <td>${p.email || '—'}</td>
+              <td>${p.telefone || '—'}</td>
+              <td>${p.sexo}</td>
+              <td><div class="td-actions">
+                <button class="btn btn-sm btn-ghost" onclick="verPaciente('${p.id}')">👁️ Ver</button>
+                <button class="btn btn-sm btn-ghost" onclick="editarPaciente('${p.id}')">✏️</button>
+                <button class="btn btn-sm btn-danger" onclick="deletarPaciente('${p.id}')">🗑️</button>
+              </div></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>`;
+    } catch (e) {
+      document.getElementById('pacientes-container').innerHTML = `<div class="empty"><p style="color:var(--danger)">Erro ao conectar com a API.</p></div>`;
+    }
+  }
+
+  async function verPaciente(id) {
+    showPage('detalhe-paciente');
+    document.getElementById('detalhe-paciente-content').innerHTML = '<div class="loading"><div class="spinner"></div>Carregando...</div>';
+    document.getElementById('consultas-do-paciente').innerHTML = '<div class="loading"><div class="spinner"></div>Carregando...</div>';
+
+    const res = await fetch(`${API}/pacientes/${id}`);
+    const p = await res.json();
+    document.getElementById('detalhe-paciente-nome').textContent = p.nome;
+
+    document.getElementById('detalhe-paciente-content').innerHTML = `
+      <div class="detail-grid">
+        <div class="detail-item"><div class="label">Nome</div><div class="value">${p.nome}</div></div>
+        <div class="detail-item"><div class="label">CPF</div><div class="value" style="font-family:var(--mono)">${p.cpf}</div></div>
+        <div class="detail-item"><div class="label">E-mail</div><div class="value">${p.email || '—'}</div></div>
+        <div class="detail-item"><div class="label">Telefone</div><div class="value">${p.telefone || '—'}</div></div>
+        <div class="detail-item"><div class="label">Nascimento</div><div class="value">${formatDateOnly(p.dataNascimento)}</div></div>
+        <div class="detail-item"><div class="label">Sexo</div><div class="value">${p.sexo}</div></div>
+        <div class="detail-item"><div class="label">Cadastrado em</div><div class="value">${formatDate(p.createdAt)}</div></div>
+      </div>`;
+
+    document.getElementById('btn-editar-paciente').onclick = () => editarPaciente(id);
+    document.getElementById('btn-deletar-paciente').onclick = () => deletarPaciente(id);
+
+    // Consultas do paciente
+    const res2 = await fetch(`${API}/consultas/paciente/${id}`);
+    const consultas = await res2.json();
+    document.getElementById('consultas-do-paciente').innerHTML = consultas.length
+      ? `<table>
+          <thead><tr><th>Data</th><th>Médico</th><th>Especialidade</th><th>Status</th></tr></thead>
+          <tbody>${consultas.map(c => `
+            <tr>
+              <td>${formatDate(c.dataConsulta)}</td>
+              <td>${c.medico}</td>
+              <td>${c.especialidade}</td>
+              <td>${badgeStatus(c.status)}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>`
+      : `<div class="empty"><p>Nenhuma consulta para este paciente.</p></div>`;
+  }
+
+  async function editarPaciente(id) {
+    const res = await fetch(`${API}/pacientes/${id}`);
+    const p = await res.json();
+    editandoPacienteId = id;
+
+    document.getElementById('p-nome').value = p.nome;
+    document.getElementById('p-cpf').value = p.cpf;
+    document.getElementById('p-email').value = p.email;
+    document.getElementById('p-telefone').value = p.telefone;
+    document.getElementById('p-nascimento').value = p.dataNascimento.split('T')[0];
+    document.getElementById('p-sexo').value = p.sexo;
+    document.getElementById('form-paciente-titulo').textContent = 'Editar Paciente';
+
+    showPage('novo-paciente');
+    document.getElementById('form-paciente-titulo').textContent = 'Editar Paciente';
+  }
+
+  async function salvarPaciente() {
+    const body = {
+      nome: document.getElementById('p-nome').value,
+      cpf: document.getElementById('p-cpf').value,
+      email: document.getElementById('p-email').value,
+      telefone: document.getElementById('p-telefone').value,
+      dataNascimento: document.getElementById('p-nascimento').value,
+      sexo: document.getElementById('p-sexo').value
+    };
+
+    const url = editandoPacienteId ? `${API}/pacientes/${editandoPacienteId}` : `${API}/pacientes`;
+    const method = editandoPacienteId ? 'PUT' : 'POST';
+
+    try {
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      if (res.ok) {
+        showAlert('alert-paciente', 'Paciente salvo com sucesso!', 'success');
+        setTimeout(() => showPage('pacientes'), 1000);
+      } else {
+        const err = await res.json();
+        showAlert('alert-paciente', err.mensagem || 'Erro ao salvar.', 'error');
+      }
+    } catch (e) {
+      showAlert('alert-paciente', 'Erro ao conectar com a API.', 'error');
+    }
+  }
+
+  async function deletarPaciente(id) {
+    if (!confirm('Tem certeza que deseja excluir este paciente?')) return;
+    await fetch(`${API}/pacientes/${id}`, { method: 'DELETE' });
+    showPage('pacientes');
+  }
+
+  // ───── CONSULTAS ─────
+  async function loadConsultas() {
+    document.getElementById('consultas-container').innerHTML = '<div class="loading"><div class="spinner"></div>Carregando...</div>';
+    try {
+      const res = await fetch(`${API}/consultas`);
+      const data = await res.json();
+
+      if (!data.length) {
+        document.getElementById('consultas-container').innerHTML = `<div class="empty"><div class="empty-icon">🗓️</div><p>Nenhuma consulta cadastrada.</p></div>`;
+        return;
+      }
+
+      document.getElementById('consultas-container').innerHTML = `
+        <table>
+          <thead><tr><th>Paciente</th><th>Médico</th><th>Especialidade</th><th>Data</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody>${data.map(c => `
+            <tr>
+              <td><strong>${c.pacienteNome}</strong></td>
+              <td>${c.medico}</td>
+              <td>${c.especialidade}</td>
+              <td>${formatDate(c.dataConsulta)}</td>
+              <td>${badgeStatus(c.status)}</td>
+              <td><div class="td-actions">
+                <button class="btn btn-sm btn-ghost" onclick="editarConsulta('${c.id}')">✏️</button>
+                <button class="btn btn-sm btn-danger" onclick="deletarConsulta('${c.id}')">🗑️</button>
+              </div></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>`;
+    } catch (e) {
+      document.getElementById('consultas-container').innerHTML = `<div class="empty"><p style="color:var(--danger)">Erro ao conectar com a API.</p></div>`;
+    }
+  }
+
+  async function carregarPacientesNoSelect() {
+    const res = await fetch(`${API}/pacientes`);
+    const pacientes = await res.json();
+    const sel = document.getElementById('c-paciente');
+    sel.innerHTML = '<option value="">Selecione o paciente...</option>';
+    pacientes.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = p.nome;
+      sel.appendChild(opt);
+    });
+  }
+
+  async function editarConsulta(id) {
+    const res = await fetch(`${API}/consultas/${id}`);
+    const c = await res.json();
+    editandoConsultaId = id;
+
+    await carregarPacientesNoSelect();
+    document.getElementById('c-paciente').value = c.pacienteId;
+    document.getElementById('c-data').value = c.dataConsulta.slice(0, 16);
+    document.getElementById('c-medico').value = c.medico;
+    document.getElementById('c-especialidade').value = c.especialidade;
+    document.getElementById('c-observacoes').value = c.observacoes;
+    document.getElementById('c-status').value = c.status;
+    document.getElementById('form-consulta-titulo').textContent = 'Editar Consulta';
+
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-nova-consulta').classList.add('active');
+  }
+
+  async function salvarConsulta() {
+    const body = {
+      pacienteId: document.getElementById('c-paciente').value,
+      dataConsulta: document.getElementById('c-data').value,
+      medico: document.getElementById('c-medico').value,
+      especialidade: document.getElementById('c-especialidade').value,
+      observacoes: document.getElementById('c-observacoes').value,
+      status: document.getElementById('c-status').value
+    };
+
+    const url = editandoConsultaId ? `${API}/consultas/${editandoConsultaId}` : `${API}/consultas`;
+    const method = editandoConsultaId ? 'PUT' : 'POST';
+
+    try {
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      if (res.ok) {
+        showAlert('alert-consulta', 'Consulta salva com sucesso!', 'success');
+        setTimeout(() => showPage('consultas'), 1000);
+      } else {
+        const err = await res.json();
+        showAlert('alert-consulta', err.mensagem || 'Erro ao salvar.', 'error');
+      }
+    } catch (e) {
+      showAlert('alert-consulta', 'Erro ao conectar com a API.', 'error');
+    }
+  }
+
+  async function deletarConsulta(id) {
+    if (!confirm('Tem certeza que deseja excluir esta consulta?')) return;
+    await fetch(`${API}/consultas/${id}`, { method: 'DELETE' });
+    showPage('consultas');
+  }
+
+  // ───── HELPERS ─────
+  function limparFormPaciente() {
+    ['p-nome','p-cpf','p-email','p-telefone','p-nascimento'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('p-sexo').value = '';
+    document.getElementById('alert-paciente').className = 'alert';
+  }
+
+  function limparFormConsulta() {
+    ['c-paciente','c-data','c-medico','c-especialidade','c-observacoes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('c-status').value = 'Agendada';
+    document.getElementById('alert-consulta').className = 'alert';
+  }
+
+  function showAlert(id, msg, type) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.className = `alert alert-${type} show`;
+  }
+
+  function formatDate(dt) {
+    if (!dt) return '—';
+    return new Date(dt).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  }
+
+  function formatDateOnly(dt) {
+    if (!dt) return '—';
+    return new Date(dt).toLocaleDateString('pt-BR');
+  }
+
+  function badgeStatus(status) {
+    const map = { 'Agendada': 'badge-blue', 'Realizada': 'badge-green', 'Cancelada': 'badge-red' };
+    return `<span class="badge ${map[status] || 'badge-yellow'}">${status}</span>`;
+  }
+
+  // Carrega dashboard ao iniciar
+  loadDashboard();
+</script>
+</body>
+</html>
