@@ -1,7 +1,6 @@
 using backend.Configurations;
 using backend.Data;
 using backend.Interfaces;
-using backend.Models;
 using backend.Repositories;
 using backend.Services;
 using Microsoft.OpenApi.Models;
